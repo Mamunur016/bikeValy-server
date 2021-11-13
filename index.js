@@ -28,8 +28,45 @@ async function run() {
         const ourTeamCollection = database.collection('ourTeam');
         const reviewsCollection = database.collection('reviews');
         const ordersCollection = database.collection('orders');
+        const usersCollection = database.collection('users');
 
 
+
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            let isAdmin = false;
+            if (user?.role === 'admin') {
+                isAdmin = true;
+            }
+            res.json({ admin: isAdmin });
+        })
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await usersCollection.insertOne(user);
+            console.log(result);
+            res.json(result);
+        });
+        app.put('/users', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email };
+            const options = { upsert: true };
+            const updateDoc = { $set: user };
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            res.json(result);
+        });
+
+        app.put('/users/admin', async (req, res) => {
+            const user = req.body;
+
+            const filter = { email: user.email };
+
+            const updateDoc = { $set: { role: 'admin' } };
+            const result = await usersCollection.updateOne(filter, updateDoc);
+            res.json(result);
+
+        })
 
 
 
@@ -68,7 +105,7 @@ async function run() {
             const services = await cursor.toArray();
             res.json(services);
         });
-        // GET API FOR SINGLE Tour
+        // GET API FOR SINGLE services
 
         app.get('/services/:id', async (req, res) => {
             const id = req.params.id;
@@ -77,10 +114,16 @@ async function run() {
             const tour = await servicesCollection.findOne(query);
             res.json(tour);
         });
+        // DELETE API
+        app.delete('/services/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await ordersCollection.deleteOne(query);
+            res.json(result);
+        });
 
 
-
-        // POST API FOR TOUR
+        // POST API FOR services
         app.post('/services', async (req, res) => {
             const tour = req.body;
             console.log('hit the post api', tour);
@@ -121,7 +164,7 @@ async function run() {
             const options = { upsert: true };
             const updateDoc = {
                 $set: {
-                    status: 'Approved ',
+                    status: 'Shipped ',
 
                 },
             };
@@ -136,7 +179,7 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const result = await ordersCollection.deleteOne(query);
             res.json(result);
-        })
+        });
 
 
     } finally {
