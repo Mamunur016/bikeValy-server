@@ -31,7 +31,7 @@ async function run() {
         const usersCollection = database.collection('users');
 
 
-
+        // users api
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
@@ -41,13 +41,15 @@ async function run() {
                 isAdmin = true;
             }
             res.json({ admin: isAdmin });
-        })
+        });
+        // user post api
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
             console.log(result);
             res.json(result);
         });
+        // user put api
         app.put('/users', async (req, res) => {
             const user = req.body;
             const filter = { email: user.email };
@@ -57,6 +59,7 @@ async function run() {
             res.json(result);
         });
 
+        // user admin cheecked api
         app.put('/users/admin', async (req, res) => {
             const user = req.body;
 
@@ -84,6 +87,7 @@ async function run() {
             const reviews = await cursor.toArray();
             res.json(reviews);
         });
+        // reviews post api
         app.post('/reviews', async (req, res) => {
             const review = req.body;
             console.log('hit the post api', review);
@@ -118,7 +122,7 @@ async function run() {
         app.delete('/services/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
-            const result = await ordersCollection.deleteOne(query);
+            const result = await servicesCollection.deleteOne(query);
             res.json(result);
         });
 
